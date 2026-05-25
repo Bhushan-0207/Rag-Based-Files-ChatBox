@@ -4,7 +4,7 @@ const API = axios.create({
     baseURL:"http://127.0.0.1:8000"
 })
 
-export const chat = (query) => API.post("/chat",{query});
+export const chat = (query,filters) => API.post("/chat",{query,filters});
 
 export const getDocuments = () => API.get("/documents");
 

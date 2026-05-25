@@ -10,33 +10,42 @@ def vector_search(
     k=5
 ):
 
-    if filters and filters.get("sources"):
-        source_filters = {
+    if (filters and filters.get("sources")):
 
-        "$or": [
-
-            {"source": source}
-
-            for source in
+        selected_sources = (
             filters["sources"]
-            ]
-        }
-
-        results = vector_db.similarity_search(
-            query,
-            k=k,
-            filter=source_filters
         )
 
+        vector_results = []
 
+        for source in selected_sources:
+
+            results = (
+                vector_db.similarity_search(
+
+                    query,
+
+                    k=k,
+
+                    filter={
+                        "source": source
+                    }
+                )
+            )
+
+            vector_results.extend(
+                results
+            )
     else:
 
-        results = vector_db.similarity_search(
-            query,
-            k=k
+        vector_results = (
+            vector_db.similarity_search(
+                query,
+                k=k
+            )
         )
 
-    return results
+    return vector_results
 
 def bm25_search(
     query,
@@ -47,42 +56,63 @@ def bm25_search(
     if bm25_store.bm25 is None:
         return []
 
-    if bm25_store.bm25 is not None:
+    # FILTERED DOCS
+    filtered_bm25_docs = (
+        bm25_store.bm25_docs
+    )
 
-        bm25_text_results = bm25_store.bm25.get_top_n(
+    if (
+        filters
+        and
+        filters.get("sources")
+    ):
+
+        filtered_bm25_docs = [
+
+            doc
+
+            for doc in
+            bm25_store.bm25_docs
+
+            if doc.metadata.get(
+                "source"
+            ) in filters["sources"]
+        ]
+
+    filtered_corpus = [
+
+        doc.page_content
+
+        for doc in
+        filtered_bm25_docs
+    ]
+
+    # EMPTY FILTERED CORPUS
+    if len(filtered_corpus) == 0:
+        return []
+
+    bm25_text_results = (
+        bm25_store.bm25.get_top_n(
+
             query.split(),
-            bm25_store.bm25_corpus,
+
+            filtered_corpus,
+
             n=n
         )
-
-    else:
-
-        bm25_text_results = []
+    )
 
     bm25_results = []
 
     for text in bm25_text_results:
 
-        for doc in bm25_store.bm25_docs:
+        for doc in filtered_bm25_docs:
 
             if doc.page_content == text:
 
-                # METADATA FILTERING
-                if filters:
-
-                    matched = True
-
-                    for key, value in filters.items():
-
-                        if doc.metadata.get(key) != value:
-
-                            matched = False
-                            break
-
-                    if not matched:
-                        continue
-
-                bm25_results.append(doc)
+                bm25_results.append(
+                    doc
+                )
 
                 break
 

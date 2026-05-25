@@ -29,9 +29,10 @@ class ChatRequest(BaseModel):
     filters: dict | None = None
 
 
+
 @router.post("/chat")
 async def chat(request: ChatRequest):
-
+    print(request.filters)
     # Retrieve
     retrieved_docs = retrieve_documents(
         request.query,

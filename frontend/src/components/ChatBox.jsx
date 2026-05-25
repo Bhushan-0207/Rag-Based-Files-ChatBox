@@ -2,7 +2,7 @@ import MessageBubble from "../components/MessageBubble";
 import { chat } from "../services/api";
 import { useState } from "react";
 
-function ChatBox(setSelectedFile, setSelectedPage) {
+function ChatBox() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -13,14 +13,12 @@ function ChatBox(setSelectedFile, setSelectedPage) {
     const selectedDocuments = JSON.parse(
       localStorage.getItem("selectedDocuments") || "[]",
     );
-
+    console.log(selectedDocuments);
+    
     const userMessage = {
       id: Date.now(),
       sender: "user",
       text: query,
-      filters: {
-        sources:selectedDocuments
-      }
     };
 
     setMessages((prev) => [...prev, userMessage]);
@@ -32,8 +30,8 @@ function ChatBox(setSelectedFile, setSelectedPage) {
     
     setLoading(true);
 
-    try {
-      const response = await chat(currentQuery);
+    try {   
+      const response = await chat(currentQuery,{sources:selectedDocuments});
       const aiMessage = {
         id: Date.now() + 1,
 
