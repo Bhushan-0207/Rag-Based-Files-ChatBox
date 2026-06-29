@@ -86,22 +86,21 @@ Answer ONLY using the provided context.
 
 Do NOT use external knowledge.
 
-If answer is not available in context say:
+If the answer is not present in the context say:
+
 "I don't know based on the uploaded documents."
 
-Always provide citations.
+Provide a clean and concise answer.
 
-Use this citation format:
+Do NOT generate citations yourself.
 
-(Source: filename, Location: page/slide/sheet)
-
-CONTEXT:
+Context:
 {context}
 
-QUESTION:
+Question:
 {query}
 
-ANSWER:
+Answer:
 """
 
     response = llm.invoke(prompt)
